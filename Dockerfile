@@ -30,15 +30,10 @@ RUN chmod 644 /root/.ssh/known_hosts
 RUN yum install -y python-docopt python-simplejson python-envoy rubygems
 ### WORKAROUND
 RUN yum install -y ruby-devel make gcc
-RUN gem install jls-grok
-#RUN yum install rubygem-jls-grok 
-#### \WORKAROUND
+#RUN gem install jls-grok
 # fpm and git
 RUN yum install -y git-core rpm-build createrepo bc
-### WORKAROUND
 RUN gem install fpm
-# RUN yum install -y rubygem-fpm
-### \WORKAROUND
 
 ### Jenkins HOME
 RUN mkdir -p /opt/jenkins
@@ -47,5 +42,8 @@ ADD etc/supervisord.d /etc/supervisord.d
 # QNIB-Build
 RUN yum install -y http://mirror.de.leaseweb.net/epel/6/i386/epel-release-6-8.noarch.rpm
 RUN yum install -y docker-io
+
+# grok-patterns
+#RUN pip install docopt envoy
 
 CMD /usr/bin/supervisord -c /etc/supervisord.conf
