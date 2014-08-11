@@ -1,17 +1,20 @@
 ###### Jenkins image
 # runs jenkins instance within a container
-FROM qnib/fd20
+FROM centos:centos6
 MAINTAINER "Christian Kniep <christian@qnib.org>"
 
 # Solution for 'ping: icmp open socket: Operation not permitted'
-RUN chmod u+s /usr/bin/ping
 RUN ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime 
 
 RUN yum clean all
 RUN yum install -y java-1.7.0-openjdk
 RUN curl -s -o /usr/share/jenkins.war  http://ftp.nluug.nl/programming/jenkins/war/1.574/jenkins.war
 
-RUN yum install -y supervisor
+RUN yum install -y python-setuptools
+RUN easy_install pip
+RUN pip install supervisor
+ADD etc/supervisord.conf /etc/supervisord.conf
+RUN mkdir -p /var/log/supervisor
 RUN sed -i -e 's/nodaemon=false/nodaemon=true/' /etc/supervisord.conf
 
 # SSH keys to log into git-server without a password
@@ -27,19 +30,22 @@ RUN chmod 644 /root/.ssh/known_hosts
 RUN yum install -y python-docopt python-simplejson python-envoy rubygems
 ### WORKAROUND
 RUN yum install -y ruby-devel make gcc
-#RUN gem install jls-grok
+RUN gem install jls-grok
 #RUN yum install rubygem-jls-grok 
 #### \WORKAROUND
 # fpm and git
 RUN yum install -y git-core rpm-build createrepo bc
 ### WORKAROUND
-#RUN gem install --source http://rubygems.org fpm
+RUN gem install fpm
 # RUN yum install -y rubygem-fpm
 ### \WORKAROUND
 
 ### Jenkins HOME
 RUN mkdir -p /opt/jenkins
-#ADD ./jenkins /opt/jenkins
 ADD etc/supervisord.d /etc/supervisord.d
 
-CMD /bin/supervisord -c /etc/supervisord.conf
+# QNIB-Build
+RUN yum install -y http://mirror.de.leaseweb.net/epel/6/i386/epel-release-6-8.noarch.rpm
+RUN yum install -y docker-io
+
+CMD /usr/bin/supervisord -c /etc/supervisord.conf
